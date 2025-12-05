@@ -1,0 +1,1 @@
+${TIME_24} ${USER}@${HOSTNAME} [${PWD}]${PROMPT_CHAR} 
