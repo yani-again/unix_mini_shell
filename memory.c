@@ -26,6 +26,30 @@ void malloc_2d(char ***prompt, int rows, int columns)
     return;
 }
 
+/* Allocates rows * columns to a 2d array using calloc.
+ * Expects: pointer to 2d char array (char***), and int
+ * values for rows & columns. */
+void calloc_2d(char ***prompt, int rows, int columns)
+{
+    *prompt = (char**)calloc(rows, sizeof(char*));
+    if (*prompt == NULL)
+    {
+        fprintf(stderr, "%s\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < rows; ++i)
+    {
+        (*prompt)[i] = (char*)calloc(columns, sizeof(char));
+        if ((*prompt)[i] == NULL)
+        {
+            fprintf(stderr, "%s\n");
+            exit(1);
+        }
+    }
+    return;
+}
+
 /* Frees the memory of a dynamically allocated 2d array.
  * Expects: 2d char array that has been dynamically 
  * allocated. */

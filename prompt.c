@@ -133,6 +133,5 @@ void print_prompt(char **prompt, char *user, char *hostname, char *pwd, char *ho
             printf("%s", prompt[i]);
         }
     }
-    putchar('\n');
 }
 

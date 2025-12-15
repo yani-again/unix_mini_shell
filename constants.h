@@ -9,4 +9,7 @@
 #define HOSTNAME_MAX 256
 #define TIME_BUFF_MAX 128
 
+#define INPUT_TOKENS_MAX 64
+#define INPUT_TOKEN_LEN 1024
+
 #endif
