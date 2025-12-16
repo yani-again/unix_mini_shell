@@ -5,10 +5,13 @@
 #include <string.h>
 #include <time.h>
 #include <sys/wait.h>
+#include <stdint.h>
+#include <fcntl.h>
 #include "prompt.h"
 #include "constants.h"
 #include "memory.h"
 #include "input.h"
+#include "special_inputs.h"
 
 /* options:
  * TIME_24, TIME_12, USER, HOSTNAME, PWD,
@@ -31,7 +34,7 @@ int main()
 
     // memory allocation
     malloc_2d(&prompt, PROMPT_TOKENS_MAX, PROMPT_TOKEN_LEN);
-    malloc_2d(&input, INPUT_TOKENS_MAX, INPUT_TOKEN_LEN);
+    calloc_2d(&input, INPUT_TOKENS_MAX, INPUT_TOKEN_LEN);
     hostname = (char*)malloc(HOSTNAME_MAX * sizeof(char));
 
     // assign prompt variables
@@ -61,10 +64,17 @@ int main()
         while (input[++tokens][0] != '\0')
             ;
 
+        // check for 'special' inputs
+        uint8_t flags = get_flags(input);
+        if (flags & O_REDIRECT || flags & I_REDIRECT)
+        {
+            tokens -= 2;
+        }
+
         // execvp options vector
         char **input_v;
         calloc_2d(&input_v, tokens, PROMPT_TOKEN_LEN);
-        for (int i = 0; i <= tokens; ++i)
+        for (int i = 0; i < tokens; ++i)
         {
             for (int j = 0; j < INPUT_TOKEN_LEN && input[i][j] != '\0'; ++j)
             {
@@ -80,15 +90,60 @@ int main()
         }
         else if (rc == 0)
         {
-            // execvp(path, var[])
-            // printf("input[0]: %s\n", input[0]);
+            // for IO redirection
+            // dup2: new_fd --> old_fd
+            // dup2()
+            if (flags & O_REDIRECT)
+            {
+                int fd_io;
+                fd_io = open(input[tokens + 1], O_CREAT | O_TRUNC | O_WRONLY,
+                                        0644);
+
+                if (fd_io == -1)
+                {
+                    printf("Couldn't open %s\n", input[tokens + 1]);
+                    fprintf(stderr, "%s\n");
+                    exit(1);
+                }
+
+                int r = dup2(fd_io, 1);
+                if (r == -1)
+                {
+                    fprintf(stderr, "%s\n");
+                    exit(1);
+                }
+            }
+            if (flags & I_REDIRECT)
+            {
+                int fd_io;
+                fd_io = open(input[tokens + 1], O_RDONLY);
+
+                if (fd_io == -1)
+                {
+                    printf("Couldn't open %s\n", input[tokens + 1]);
+                    fprintf(stderr, "%s\n");
+                    exit(1);
+                }
+
+                int r = dup2(fd_io, 0);
+                if (r == -1)
+                {
+                    fprintf(stderr, "%s\n");
+                    exit(1);
+                }
+            }
+
+
             execvp(input[0], input_v);
+            exit(1);
         }
         else
         {
             int rc_wait = wait(NULL);
             // printf("done! rc_wait: %d\n", rc_wait);
         }
+
+        // de-allocate input_v before every loop
         free_2d(input_v, tokens);
     }
 

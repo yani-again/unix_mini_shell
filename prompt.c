@@ -6,6 +6,9 @@
 #include "prompt.h"
 #include "constants.h"
 
+/* Reads the contents of CONFIG_FILE into the passed
+ * buffer.
+ * Expects: pointer to char buffer, max prompt size. */
 void dup_prompt(char *prompt_buff, int prompt_size)
 {
     FILE *fd_config;
@@ -23,6 +26,9 @@ void dup_prompt(char *prompt_buff, int prompt_size)
     return;
 }
 
+/* Splits the raw prompt into tokens and stores them
+ * into the passed 2d char array.
+ * Expects: 2d char array. */
 void tokenize_prompt(char **prompt)
 {
     char *raw_prompt = (char*)malloc(LINE_MAX * sizeof(char));
@@ -84,6 +90,9 @@ void tokenize_prompt(char **prompt)
     return;
 }
 
+/* Prints the prompt to the screen.
+ * Expects: 2d char array (the tokenized prompt), and
+ * all possible options. */
 void print_prompt(char **prompt, char *user, char *hostname, char *pwd, char *home,
                   char prompt_char)
 {

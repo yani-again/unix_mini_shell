@@ -1,5 +1,9 @@
 #include "input.h"
 
+/* Splits raw_input at the right places to create a
+ * tokenized form of the input, stored in **input.
+ * Expects 2d char array for tokenized input, char
+ * array to raw input. */
 void tokenize_input(char **input, char *raw_input)
 {
     int i, rows, columns;
